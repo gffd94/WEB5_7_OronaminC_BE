@@ -1,265 +1,419 @@
-# WEB5_7_OronaminC_BE
+<div align="center">
 
-[프로그래머스 백엔드 데브코스 최종프로젝트] 5기 7회차 8팀 BE 저장소입니다.
+# 🙋 Joinin
 
-## 1. 프로젝트 소개
+**발표 중에 청중과 발표자가 실시간으로 질문 · 답변 · 공감을 주고받는 Q&A 서비스**
 
-**OronaminC**는 발표(프레젠테이션) 도중 발표자와 청중이 실시간으로 질문·답변·공감(리액션)을
-주고받을 수 있는 **발표방(Q&A) 플랫폼**의 백엔드 서버입니다.
+프로그래머스 백엔드 데브코스 5기 최종 프로젝트 · 팀 OronaminC
 
-- 발표자는 발표방을 만들고 발표자료(문서)를 업로드한 뒤, 비밀코드로 팀원/청중을 초대합니다.
-- 청중은 발표를 들으며 실시간으로 질문을 남기고, 발표자·팀원은 실시간으로 답변합니다.
-- 질문/답변/발표방에는 이모지로 공감을 표시할 수 있고, 발표가 끝나면 결과 리포트를 조회할 수 있습니다.
+<br>
 
-REST API로 리소스를 관리하고, WebSocket(STOMP)으로 질문·답변·공감의 실시간 동기화를 처리하는
-구조로 설계했습니다.
+![Java](https://img.shields.io/badge/Java_21-007396?style=flat-square&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot_3.5-6DB33F?style=flat-square&logo=springboot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
+![WebSocket](https://img.shields.io/badge/WebSocket_·_STOMP-010101?style=flat-square&logo=socketdotio&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS_S3_·_EC2-232F3E?style=flat-square&logo=amazonwebservices&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)
+![k6](https://img.shields.io/badge/k6-7D64FF?style=flat-square&logo=k6&logoColor=white)
 
-## 2. 주요 기능
+[프론트엔드 저장소](https://github.com/prgrms-web-devcourse-final-project/WEB5_7_OronaminC_FE)
 
-### 인증 / 회원
+</div>
+
+<br>
+
+## 📌 한눈에 보기
+
+| 📡 실시간 전달률 | ✍️ 답변 수정 성공률 | 🔒 WebSocket 보안 | 🧪 테스트 |
+|:---:|:---:|:---:|:---:|
+| **0% → 100%** | **62.8~74.8% → 99.7~100%** | **구멍 3종 차단** | **116개 통과** |
+| 수정 · 삭제 브로드캐스트<br>(k6, 72,000건 기준) | 공감이 몰리는 답변 수정<br>(k6, 공감 VU 30~100) | 명의 위조 · 남의 방 구독<br>· 브로커 직행 SEND | 핵심 인증 컴포넌트<br>라인 커버리지 90~100% |
+
+| | 팀 프로젝트 | 개인 리팩토링 |
+|---|---|---|
+| **기간** | 2025.06 – 2025.08 | 2025.11, 2026.09 |
+| **인원** | 6명 (백엔드 5 · 프론트엔드 1) | 1명 |
+| **역할** | 팀장 · 백엔드<br>발표방(Room) · 참가자 도메인 설계, CI/CD와 EC2 배포 구성, 일정 관리 | 인증 구조, 답변 WebSocket 쓰기 경로, 구독 보안, CI/CD 개선<br>문제 진단부터 테스트 · 부하 측정 · PR까지 |
+
+> [!NOTE]
+> 이 README는 **Part 1 팀 프로젝트**(서비스와 구조)와 **Part 2 개인 리팩토링**(출시 후 다시 뜯어보며 고친 것)으로 나뉜다. 리팩토링은 "문제 → 원인 → 해결 → 검증" 순서로 정리했고, 수치는 모두 같은 조건에서 전후를 번갈아 측정한 값이다.
+
+<br>
+
+## 📖 목차
+
+**Part 1. 팀 프로젝트**
+1. [서비스 소개](#-서비스-소개)
+2. [시스템 아키텍처](#-시스템-아키텍처)
+3. [기술 스택](#-기술-스택)
+4. [데이터 모델](#-데이터-모델)
+
+**Part 2. 개인 리팩토링**
+
+5. [리팩토링 한눈에 보기](#-리팩토링-한눈에-보기)
+6. [1차 · 인증 구조 바로잡기](#1차--인증-구조-바로잡기)
+7. [2차 · 답변 WebSocket 쓰기 경로](#2차--답변-websocket-쓰기-경로)
+8. [3차 · 구독과 브로커 직행 SEND 막기](#3차--구독과-브로커-직행-send-막기)
+9. [CI/CD 개선](#-cicd-개선)
+10. [테스트](#-테스트)
+11. [남은 과제](#-남은-과제)
+
+[실행 방법](#-실행-방법)
+
+<br>
+
+---
+
+# Part 1. 팀 프로젝트
+
+## 🎯 서비스 소개
+
+발표 중에 손을 들고 질문하기는 어렵다. Joinin은 청중이 발표를 들으며 바로 질문을 남기고, 발표자와 팀원이 실시간으로 답하는 **발표방 Q&A 플랫폼**이다.
+
+| 역할 | 할 수 있는 일 |
+|---|---|
+| 🎤 **발표자** | 발표방 생성 · 수정 · 삭제, 발표자료 업로드, 비밀코드로 초대, 발표 시작 · 종료, 결과 리포트 조회 |
+| 👥 **팀원** | 비밀코드로 입장, 질문에 실시간 답변 |
+| 🙋 **청중(게스트)** | 회원가입 없이 입장, 실시간 질문, 이모지 공감 |
+
+<details>
+<summary><b>주요 기능 전체 보기</b></summary>
+
+<br>
+
+**인증 · 회원**
 - 카카오 소셜 로그인(OAuth2), 비회원(게스트) 로그인
-- JWT 기반 Access/Refresh Token 발급 및 재발급(로테이션), 로그아웃
-- 회원 프로필 조회/수정, 회원 존재 여부 확인
-- 내가 생성했거나 참여한 발표방 목록 조회
+- JWT Access/Refresh Token 발급, 재발급(로테이션), 로그아웃
+- 내가 만들었거나 참여한 발표방 목록
 
-### 발표방(Room)
-- 발표방 생성 · 수정 · 삭제
-- 비밀코드를 이용한 발표방 입장
-- 발표방 상태 관리(시작 전 / 진행 중 / 종료), PUBLIC/PRIVATE 공개 범위
-- 발표 종료 후 결과 리포트 조회
+**발표방**
+- 생성 · 수정 · 삭제, 비밀코드 입장
+- 상태 관리(시작 전 / 진행 중 / 종료), PUBLIC / PRIVATE
+- 발표 종료 후 결과 리포트
 
-### 실시간 질문·답변·공감 (WebSocket / STOMP)
-- 질문 실시간 생성 · 수정 · 삭제, 질문 목록 REST 조회
-- 답변 실시간 생성 · 수정 · 삭제, 답변 목록 REST 조회
-- 질문 / 답변 / 발표방에 대한 실시간 이모지 공감 생성 · 삭제
-- 참가자 유형(발표자 / 팀원 / 게스트)에 따른 권한 분리
-- Bucket4j 기반 요청 속도 제한(질문 생성, 답변 생성, 이모지 공감)
+**실시간 질문 · 답변 · 공감 (WebSocket / STOMP)**
+- 질문 · 답변 실시간 생성 · 수정 · 삭제, 목록은 REST로 조회
+- 질문 · 답변 · 발표방에 이모지 공감
+- 참가자 유형(발표자 / 팀원 / 게스트)별 권한
+- Bucket4j로 질문 · 답변 · 공감 요청 속도 제한
 
-### 발표자료(Document)
-- 클라이언트가 AWS S3에 파일을 직접 업로드할 수 있도록 Presigned URL 발급
+**발표자료**
+- 클라이언트가 S3에 직접 올리도록 Presigned URL 발급
 
-## 3. 권한/인증 구조
+</details>
 
-Spring Security + JWT를 기반으로 REST API와 WebSocket(STOMP) 인증을 각각 별도 파이프라인으로 구성했습니다.
+<br>
 
-**로그인 & 토큰 발급**
-- 카카오 OAuth2 로그인 또는 게스트 로그인 성공 시 `JwtTokenProvider`가 Access/Refresh Token 쌍을 발급합니다.
-- Access Token은 응답 바디로 전달되어 이후 요청의 `Authorization: Bearer <token>` 헤더로 사용되고,
-  Refresh Token은 `HttpOnly` + `Secure` + `SameSite=None` 쿠키로 내려갑니다.
+## 🏗️ 시스템 아키텍처
 
-**REST API 인증 (`JwtAuthenticationFilter`)**
-- 매 요청마다 `Authorization` 헤더의 JWT를 검증하고, `MemberDetails`(id/nickname/role)를 만들어
-  `SecurityContext`의 principal로 설정합니다. `@AuthenticationPrincipal MemberDetails`로 컨트롤러에서 바로 사용합니다.
+<img width="3000" height="1800" alt="architecture (1)" src="https://github.com/user-attachments/assets/650e632e-60cc-4871-a34b-4715c3e4abfb" />
 
-**Refresh Token 재발급 & 무효화 (`RefreshTokenStore`, 캐시 기반)**
-- 회원별 "가장 최근에 발급된" refresh token과, 이미 사용/무효화된 토큰의 블랙리스트를 캐시(Caffeine)에 보관합니다.
-- `/api/auth/token/refresh` 호출 시 토큰이 없거나, 블랙리스트에 있거나, 최신 토큰이 아니면 재발급을 거부합니다(400).
-- 재발급 성공 시 기존 refresh token은 즉시 블랙리스트로 등록되어(로테이션) 재사용을 차단합니다.
-- 로그아웃 시에도 현재 refresh token을 블랙리스트에 등록하고, 응답에 만료 쿠키(`Max-Age=0`)를 실어 보냅니다.
 
-**인증 실패 응답 분리 (`RestAuthenticationEntryPoint`)**
-- `oauth2Login()`이 등록하는 기본 동작은 인증되지 않은 요청을 카카오 로그인 페이지로 302 리다이렉트시킵니다.
-  브라우저 로그인 흐름에는 맞지만 JWT 기반 REST 클라이언트에는 부적절한 동작입니다.
-- `exceptionHandling().defaultAuthenticationEntryPointFor(...)`로 `/api/**` 요청만 골라
-  이 프로젝트의 `ErrorCode` 컨벤션에 맞춘 401 JSON(`UNAUTHORIZED_MEMBER`)으로 응답하도록 분리했고,
-  실제 브라우저의 카카오 로그인 흐름은 기존 리다이렉트 동작을 그대로 유지합니다.
+| 구성 요소 | 역할 |
+|---|---|
+| **JWT 인증 필터** | REST 요청마다 Bearer 토큰을 검증하고 `MemberDetails`를 principal로 설정 |
+| **STOMP 인터셉터** | WebSocket 프레임을 브로커에 넘기기 전에 검사. CONNECT 인증, SUBSCRIBE 참가자 확인, SEND 목적지 확인 |
+| **Simple Broker** | `/topic/rooms/{roomId}/...`로 같은 방 참가자에게 실시간 전송 |
+| **Caffeine 캐시** | 회원별 최신 Refresh Token과 블랙리스트 보관 |
+| **배포** | release 브랜치 push → 테스트 게이트 → 태깅 → GHCR 이미지 → EC2에서 `docker compose up` |
 
-**WebSocket(STOMP) 인증 (`StompAuthChannelInterceptor`)**
-- HTTP 요청의 `SecurityContext`에 의존하지 않고, STOMP `CONNECT` 프레임의 `Authorization` 네이티브 헤더에서
-  JWT를 직접 꺼내 검증합니다.
-- 인증 성공 시 `StompPrincipal(memberId)`을 세션에 설정하고, 실패 시 `ErrorException(UNAUTHORIZED_MEMBER)`을 던져
-  `StompErrorHandler`가 STOMP `ERROR` 프레임으로 변환해 클라이언트에 전달합니다.
+각 도메인은 `api → service → dao / Reader → domain` 레이어로 나누고, 여러 도메인에 걸친 유스케이스는 Facade(`EmojiFacade`, `AnswerFacade`)로 분리했다.
+
+<br>
+
+## 🧰 기술 스택
+
+| 구분 | 기술 |
+|---|---|
+| **Backend** | Java 21, Spring Boot 3.5.3, Spring Data JPA, QueryDSL 5, Validation, spring-retry |
+| **인증** | Spring Security, OAuth2 Client(카카오), JWT(jjwt 0.12) |
+| **실시간** | WebSocket, STOMP, SockJS |
+| **DB · 캐시** | MySQL, Caffeine, H2(테스트) |
+| **인프라** | AWS S3(Presigned URL), EC2, Docker(멀티스테이지), GHCR |
+| **CI/CD** | GitHub Actions(PR 테스트, 포맷 자동 적용, 릴리스 · 배포) |
+| **기타** | Bucket4j(요청 제한), springdoc-openapi(Swagger) |
+| **테스트** | JUnit5, Mockito, AssertJ, Spring Security Test, JaCoCo, k6 |
+| **Frontend** | React 19, TypeScript, Vite, TanStack Query, Zustand, STOMP.js |
+
+<br>
+
+## 🗄️ 데이터 모델
 
 ```mermaid
-sequenceDiagram
-    participant C as 클라이언트
-    participant Auth as "AuthController / TokenController"
-    participant Filter as JwtAuthenticationFilter
-    participant Store as "RefreshTokenStore(Cache)"
-    participant Stomp as StompAuthChannelInterceptor
+erDiagram
+    member ||--o{ participant : "참여"
+    room ||--o{ participant : "참가자"
+    room ||--o{ question : ""
+    room ||--o| document : "발표자료"
+    question ||--o{ answer : ""
+    member ||--o{ question : "작성"
+    member ||--o{ answer : "작성"
+    member ||--o{ emoji : "공감"
 
-    C->>Auth: 카카오 로그인 / 게스트 로그인
-    Auth-->>C: accessToken(JSON) + refreshToken(HttpOnly Cookie)
-
-    C->>Filter: API 요청 (Authorization: Bearer accessToken)
-    Filter->>Filter: JWT 검증 → MemberDetails principal 생성
-    Filter-->>C: 인증된 요청 처리
-
-    C->>Auth: POST /api/auth/token/refresh (refreshToken 쿠키)
-    Auth->>Store: 블랙리스트 여부 / 최신 토큰 여부 확인
-    Store-->>Auth: 유효함
-    Auth->>Store: 기존 refreshToken 블랙리스트 등록 (로테이션)
-    Auth-->>C: 새 accessToken + 새 refreshToken 쿠키
-
-    C->>Stomp: STOMP CONNECT (Authorization: Bearer accessToken)
-    Stomp->>Stomp: JWT 검증 → StompPrincipal(memberId) 설정
-    Stomp-->>C: 실시간 채널 연결 성공
+    room {
+        bigint id PK
+        varchar title
+        varchar secret_code
+        varchar room_status "BEFORE_START, STARTED, ENDED"
+        varchar room_type "PUBLIC, PRIVATE"
+        bigint emoji_count
+        int version
+    }
+    participant {
+        bigint id PK
+        bigint room_id FK
+        bigint member_id FK
+        varchar participant_type "PRESENTER, TEAM, GUEST"
+    }
+    question {
+        bigint id PK
+        bigint room_id FK
+        bigint member_id FK
+        varchar content
+        bigint emoji_count
+        int version
+    }
+    answer {
+        bigint id PK
+        bigint question_id FK
+        bigint member_id FK
+        varchar content
+        bigint emoji_count
+        int version
+    }
+    emoji {
+        bigint id PK
+        bigint member_id FK
+        varchar target_type "ROOM, QUESTION, ANSWER"
+        bigint target_id
+    }
+    member {
+        bigint id PK
+        varchar nickname
+        varchar member_type "MEMBER, GUEST"
+    }
+    document {
+        bigint id PK
+        bigint room_id FK
+        varchar file_url
+    }
 ```
 
-## 4. 기술 스택
+- **참가자(`participant`)가 권한의 기준**이다. 같은 회원도 방마다 발표자 · 팀원 · 게스트 중 하나의 역할을 갖는다.
+- 공감은 대상 종류(`target_type`)와 ID로 질문 · 답변 · 발표방을 한 테이블에서 다룬다.
+- 질문 · 답변 · 발표방은 공감 수(`emoji_count`)를 직접 들고 있고, `@Version`으로 낙관적 락을 건다. 이 구조가 Part 2의 2차 리팩토링에서 문제가 된다.
 
-| 구분 | 내용 |
+<br>
+
+---
+
+# Part 2. 개인 리팩토링
+
+팀 프로젝트가 끝난 뒤 코드를 다시 읽으며 **"동작하는 것처럼 보이지만 실제로는 깨져 있는 곳"** 을 찾아 고쳤다. 대부분 에러 로그 없이 조용히 실패하던 문제라, 고치는 것만큼 **고쳐졌다는 것을 증명하는 일**에 시간을 썼다.
+
+## 🗺️ 리팩토링 한눈에 보기
+
+| 차수 | 시기 | 주제 | 핵심 결과 | PR · 커밋 |
+|:---:|---|---|---|---|
+| 1차 | 2025.11, 2026.09 | 인증 구조 | 구조적 문제 5건 + 검증 중 발견한 버그 2건 수정, 테스트 18개 | #152 외 커밋 10개 |
+| 2차 | 2026.09 | 답변 WebSocket 쓰기 경로 | 브로드캐스트 0% → 100%, 수정 성공률 → 99.7~100% | 커밋 10개 |
+| 3차 | 2026.09 | 구독 · 브로커 직행 SEND | 비참가자 구독, `/topic` 직행 SEND 차단 | #154 |
+| CI | 2026.09 | 배포 전 테스트 게이트 | release 배포 전에 테스트 강제, flaky 테스트 분리 | #153 |
+
+1~3차는 결국 **WebSocket으로 들어오는 프레임을 어디서, 무엇을 기준으로 믿을 것인가**라는 한 가지 질문으로 이어진다.
+
+<img width="2840" height="1400" alt="websocket-security" src="https://github.com/user-attachments/assets/3c6a8f2d-5c3c-4493-b1e6-866b4dcb95ae" />
+
+
+<br>
+
+## 1차 · 인증 구조 바로잡기
+
+> 로그인은 되는데, 인증이 실제로는 제대로 걸려 있지 않았다.
+
+| # | 문제 | 원인 | 해결 |
+|:---:|---|---|---|
+| 1 | **WebSocket 인증이 사실상 무의미** | STOMP 인터셉터가 `SecurityContextHolder`에서 인증을 꺼냈는데, 이건 스레드 로컬이라 WebSocket 스레드에서는 항상 비어 있음 | CONNECT 프레임의 `Authorization` 헤더에서 JWT를 **직접** 검증하고 `StompPrincipal(memberId)`을 세션에 저장 |
+| 2 | Principal 타입 불일치 | 필터는 `Long`, 컨트롤러는 `MemberDetails`를 기대 | 필터에서 `MemberDetails`를 만들도록 통일. 컨트롤러는 수정 없음 |
+| 3 | Refresh Token 블랙리스트가 동작 안 함 | 등록해야 할 자리에서 **조회 메서드**(`isBlacklisted`)를 호출하고 반환값을 버림 | 등록 메서드 `blacklist()` 추가, 로그아웃 · 재발급 두 곳에서 호출 |
+| 4 | 로그아웃해도 쿠키가 남음 | 만료 쿠키 객체만 만들고 응답에 싣지 않음 | `Set-Cookie` 헤더에 실제로 반영 |
+| 5 | 토큰 재발급 API 접근 문제 | 재발급 경로 공개 설정 누락 | 공개 경로로 수정 |
+
+**테스트를 쓰다가 추가로 찾은 버그 2건**
+
+| 버그 | 원인 | 해결 |
+|---|---|---|
+| 무효화된 토큰으로 재발급 시 **500** | `IllegalArgumentException`을 처리하는 핸들러가 없어 범용 500으로 떨어짐 | 프로젝트 컨벤션(`ErrorException` + `ErrorCode`)의 `INVALID_REFRESH_TOKEN`(400)으로 교체 |
+| 토큰 없이 API 호출 시 401이 아니라 **302** | `oauth2Login()`의 기본 진입점이 모든 미인증 요청을 카카오 로그인 페이지로 리다이렉트 | `/api/**`만 `RestAuthenticationEntryPoint`로 401 JSON 응답. 브라우저 로그인 흐름은 그대로 유지 |
+
+<details>
+<summary><b>배운 점</b></summary>
+
+<br>
+
+- **HTTP와 WebSocket은 별개의 인증 파이프라인이다.** 한쪽 인증 결과를 다른 쪽에서 재사용하면 스레드 경계에서 조용히 깨진다.
+- 반환값을 쓰지 않는 호출은 컴파일 에러가 나지 않는다. 부수효과가 없어 보이는 호출은 의도를 의심한다.
+- 객체를 만드는 것과 응답에 반영하는 것은 다른 단계다.
+- 새 예외를 던지기 전에, 전역 예외 처리기가 그 타입을 실제로 처리하는지 확인한다.
+
+</details>
+
+<br>
+
+## 2차 · 답변 WebSocket 쓰기 경로
+
+> 1차에서 CONNECT를 고쳤는데도, 답변 쓰기 경로에는 세 가지 문제가 남아 있었다.
+
+### 문제 1. 남의 명의로 답변할 수 있었다
+
+| | 리팩토링 전 | 리팩토링 후 |
+|---|---|---|
+| 작성자 결정 | 요청 payload의 `memberId`를 그대로 사용 | 연결 시 검증된 `StompPrincipal`에서 꺼냄 |
+| 결과 | payload만 바꾸면 **다른 사람 이름으로 작성 · 수정 · 삭제** 가능 | 클라이언트가 보낸 ID는 믿지 않음 |
+
+CONNECT 인증을 고쳐도, 컨트롤러가 인증된 사용자 대신 **요청 본문의 값을 믿으면** 인증은 의미가 없다. 공통 헬퍼(`StompPrincipalUtil`)를 만들어 **WebSocket 컨트롤러 전체**에 적용했다. 삭제 권한도 "답변 작성자 본인만"으로 좁혔다.
+
+### 문제 2. 수정 · 삭제가 DB에는 반영되는데 아무에게도 전달되지 않았다
+
+- 수정 · 삭제 경로(`/app/answers/{answerId}/update`)에 `roomId`가 없는데, 결과는 `@SendTo("/topic/rooms/{roomId}/answers")`로 보내고 있었다.
+- `{roomId}`를 채울 수 없으니 **DB 반영 후 전송 단계에서 실패**하고, 요청자는 `SOCKET-2000` 에러를, 같은 방 사람들은 아무것도 받지 못했다.
+- 에러 로그도 남지 않아 **조용한 실패(silent failure)** 였다.
+- 경로에 `roomId`를 넣고, 답변이 그 방 소속인지도 검증하도록 바꿨다.
+
+### 문제 3. 공감이 몰리면 답변 수정이 실패했다
+
+- 답변의 내용(`content`)과 공감 수(`emojiCount`)가 **같은 `@Version`을 공유**한다.
+- 공감이 쏟아지면 버전이 계속 올라가, 그 사이 들어온 답변 수정이 낙관적 락 충돌로 롤백됐다.
+- `AnswerFacade`에서 **트랜잭션 바깥 재시도**(50ms 간격, 최대 10회)로 완화하고, 다 써도 실패하면 `CONFLICT_ANSWER`로 명확히 응답한다.
+
+> [!IMPORTANT]
+> 재시도는 **증상 완화**다. 근본 원인은 자주 바뀌는 공감 수와 드물게 바뀌는 내용이 한 버전을 공유하는 구조라서, 공감 수를 원자적 조건부 UPDATE로 바꾸거나 별도 테이블로 분리하는 것이 근본 해결이다. 이번 범위에서는 영향 범위를 줄이려고 재시도를 택했고, 근본 해결은 [남은 과제](#-남은-과제)로 남겼다.
+
+### 검증
+
+**STOMP 통합 테스트** — 실제 WebSocket으로 연결해 위조 · 권한 · 브로드캐스트 시나리오를 확인했다. 그리고 **수정한 코드를 일부러 되돌려 테스트가 실제로 실패하는지**(뮤테이션 검증) 확인했는데, 이 과정에서 위조 대상이 원래 권한이 없는 역할이라 **우연히 통과하던 헐거운 테스트**를 찾아 보강했다.
+
+**k6 부하 테스트** — 리팩토링 전후 서버를 번갈아 띄워 같은 조건에서 3회씩 측정했다.
+
+| 시나리오 | 지표 | 전 | 후 |
+|---|---|:---:|:---:|
+| C. 수정 · 삭제 브로드캐스트<br><sub>방 5개 × 구독자 20명, 60초</sub> | 구독자 수신률 | **0%** (0 / 72,000) | **100%** (72,000 / 72,000) |
+| | DB엔 반영됐는데 전달 안 된 작업 | 1,200건 (전부) | **0건** |
+| A. 공감 폭주 중 답변 수정<br><sub>공감 VU 30 / 50 / 100명</sub> | 수정 성공률 | 72.8% / 62.8% / 74.8% | **100% / 100% / 99.7%** |
+| | 수정 지연 p95 | 6~22ms (실패도 즉시 응답) | 122~221ms |
+
+- 재시도의 대가는 **수정 지연**이다. p95가 100~200ms대로 늘었다.
+- 경합 없는 공감 요청의 처리 지연, 반영률, 처리량은 전후가 사실상 같아 **재시도가 다른 요청을 밀어내는 부작용은 측정되지 않았다.**
+- 측정 설계, 회차별 원본 값, 한계는 [load-test/README.md](load-test/README.md)에 있다.
+
+<br>
+
+## 3차 · 구독과 브로커 직행 SEND 막기
+
+> CONNECT도, 명의도 고쳤다. 그런데 **로그인한 사용자라면 아무 방이나 엿볼 수 있었다.**
+
+| 구멍 | 상황 | 해결 |
+|---|---|---|
+| **남의 방 구독** | SUBSCRIBE에 참가자 확인이 없어, 로그인만 하면 다른 방의 `/topic/rooms/{id}/...`를 구독할 수 있었음 | 인터셉터에서 **참가자 여부 검증**, 여러 방을 한 번에 받는 와일드카드 구독 거부 |
+| **브로커 직행 SEND** | 클라이언트가 `/topic`이나 `/user`로 직접 SEND하면 컨트롤러를 거치지 않고 다른 참가자에게 **가짜 이벤트**를 뿌릴 수 있었음 | 클라이언트는 `/app/...`(컨트롤러)로만 보낼 수 있게 제한 |
+
+**구독 검증이 원래 왜 없었나** — 주석 처리된 검증 코드가 `SessionSubscribeEvent` 리스너 안에 있었다. 그런데 이벤트 리스너에서 예외를 던져도 Spring은 **로그만 남기고 구독을 막지 않는다.** 주석을 풀었어도 동작하지 않았을 코드라, 검증을 인터셉터의 `preSend`로 옮기고 죽은 코드는 지웠다.
+
+비참가자 구독 거부, 와일드카드 거부, 직행 SEND 거부, 정상 `/app` 경로 회귀 테스트를 추가했고 전체 116개 테스트가 통과했다.
+
+<details>
+<summary><b>배운 점 (1~3차 공통)</b></summary>
+
+<br>
+
+- **"연결할 때 인증했다"와 "모든 요청이 안전하다"는 다르다.** CONNECT, SEND, SUBSCRIBE는 각각 따로 검증해야 한다.
+- **클라이언트가 보낸 식별자는 믿지 않는다.** 서버가 검증한 Principal만 쓴다.
+- 이벤트 리스너는 **막는 자리가 아니라 듣는 자리**다. 차단은 처리 흐름 안(인터셉터)에서 해야 한다.
+- 조용한 실패는 로그가 없어 운영 중에 발견하기 어렵다. **부하 테스트로 "DB 반영"과 "전달"을 따로 세어야** 드러났다.
+
+</details>
+
+<br>
+
+## 🚀 CI/CD 개선
+
+| 문제 | 해결 |
 |---|---|
-| 언어 | Java 21 |
-| 프레임워크 | Spring Boot 3.5.3 (Web, WebSocket, Security, OAuth2 Client, Data JPA, Validation, Cache) |
-| 인증 | JWT(jjwt 0.12.6), Spring Security, OAuth2(카카오 로그인) |
-| DB / ORM | MySQL, Spring Data JPA + QueryDSL 5.0.0(Jakarta), H2(테스트) |
-| 캐시 | Caffeine (Refresh Token 최신/블랙리스트 관리, 도메인 캐시) |
-| 실시간 통신 | WebSocket / STOMP |
-| 파일 저장 | AWS S3 (Presigned URL 발급, AWS SDK v2) |
-| 요청 제한 | Bucket4j |
-| API 문서 | springdoc-openapi(Swagger UI) |
-| 기타 라이브러리 | spring-retry, commons-lang3 |
-| 테스트 | JUnit5, Mockito, AssertJ, Spring Boot Test, Spring Security Test, JaCoCo |
-| 빌드 / 배포 | Gradle, Docker(멀티스테이지 빌드), GitHub Actions, GHCR, EC2 |
+| release 브랜치에 push하면 **테스트 없이** 바로 이미지 빌드 · 배포 | 릴리스 워크플로가 PR 테스트 워크플로(`ci.yml`)를 `workflow_call`로 재사용해 **테스트 통과 후에만** 태깅 · 배포 |
+| 동시성 테스트(`EmojiFacadeTests`)가 가끔 실패해 전체 빌드를 막음 | `@Tag("flaky")`로 분리해 별도 Gradle 태스크(`testFlaky`)로 실행 |
+| 포맷 자동 적용 워크플로가 실패 | google-java-format 최신 버전이 JDK 21을 요구 → `setup-java` 단계 추가 |
+| 테스트가 깨진 PR도 병합 가능 | `dev` 브랜치 보호 규칙에 테스트 체크 필수 지정 |
 
-## 5. 시스템 아키텍처
+<br>
 
-```mermaid
-flowchart LR
-    Browser["웹 클라이언트"]
+## 🧪 테스트
 
-    Browser -- "REST API" --> API["Spring Boot 애플리케이션"]
-    Browser -- "WebSocket(STOMP)" --> API
+| 종류 | 도구 | 내용 |
+|---|---|---|
+| 단위 | JUnit5, Mockito | 필터, 토큰 저장소, 인터셉터, 에러 핸들러 |
+| 통합 | MockMvc, `@SpringBootTest` | 토큰 재발급 · 로그아웃 응답, 401/302 분기, permitAll 경로 |
+| STOMP 통합 | 실제 WebSocket 연결 | 명의 위조, 권한, 브로드캐스트, 구독 · 직행 SEND 차단 |
+| 부하 | k6 | 리팩토링 전후 같은 조건 비교 (3회 교대 측정) |
 
-    API -- "OAuth2 로그인" --> Kakao["카카오 OAuth2"]
-    API -- "JPA / QueryDSL" --> DB[("MySQL")]
-    API -- "인메모리 캐시" --> Cache[("Caffeine Cache")]
-    API -- "Presigned URL 발급" --> S3[("AWS S3")]
+<details>
+<summary><b>인증 컴포넌트 라인 커버리지 (JaCoCo)</b></summary>
 
-    subgraph CICD["GitHub Actions"]
-        direction TB
-        PRTest["PR → dev\n테스트 자동 실행"]
-        Format["PR → dev\nGoogle Java Format 자동 적용"]
-        Release["push → release\n자동 태깅/릴리즈"]
-    end
+<br>
 
-    Release -- "Docker 이미지 빌드/푸시" --> GHCR[("GitHub Container Registry")]
-    GHCR -- "docker compose pull/up" --> EC2["EC2 인스턴스"]
-```
-
-각 도메인(`room`, `question`, `answer`, `emoji`, `member` 등)은 `api(Controller) → service → dao(Repository) / Reader → domain(Entity)`
-레이어로 구성되며, 여러 도메인에 걸친 유스케이스는 별도의 Facade(예: `EmojiFacade`)로 분리했습니다.
-DTO 변환은 도메인별 `mapper`가 담당합니다.
-
-## 6. 트러블슈팅
-
-리팩토링 과정에서 실제로 겪고 해결한 문제들입니다.
-
-### Refresh Token이 실제로는 블랙리스트에 등록되지 않던 버그
-- **문제**: 로그아웃하거나 토큰을 재발급받아도 이전 refresh token이 여전히 유효하게 재사용될 수 있는 상태였습니다.
-- **원인**: `refreshTokenStore.isBlacklisted(refresh)`를 호출만 하고 반환값을 사용하지 않고 있었습니다. 실제로 등록하는
-  코드(`blacklist()`)가 아니라 조회만 하는 코드가 잘못 호출되고 있던, 이름이 비슷해서 생긴 실수였습니다.
-- **해결**: 블랙리스트 등록 전용 메서드 `blacklist(refreshToken)`을 추가하고, 로그아웃/토큰 재발급 두 지점 모두
-  이 메서드를 호출하도록 수정했습니다.
-- **배운 점**: 반환값을 쓰지 않는 메서드 호출은 컴파일 에러가 나지 않아 리뷰 없이는 놓치기 쉽습니다. 부수효과가
-  없어 보이는 호출을 보면 의도를 의심해봐야 합니다.
-
-### 로그아웃 응답에 만료 쿠키가 실제로 실리지 않던 문제
-- **문제**: 로그아웃 API를 호출해도 브라우저에 refreshToken 쿠키가 그대로 남아 있었습니다.
-- **원인**: 만료 쿠키(`maxAge(0)`) 객체는 만들었지만, 그 객체를 실제 응답 헤더에 실어 보내는
-  `response.setHeader(...)` 호출이 빠져 있었습니다.
-- **해결**: `response.setHeader(HttpHeaders.SET_COOKIE, expired.toString())`를 명시적으로 추가했습니다.
-- **배운 점**: 값 객체를 만드는 것과 그것을 실제 응답에 반영하는 것은 별개의 단계이며, 둘 다 있어야 동작이 완성됩니다.
-
-### WebSocket 인증이 구조적으로 동작하기 어려운 상태였던 문제
-- **문제**: `StompAuthChannelInterceptor`가 `SecurityContextHolder`에서 인증 정보를 꺼내 STOMP 세션에 붙이는
-  방식이었는데, WebSocket CONNECT 처리 시점에는 HTTP 요청 스레드의 `SecurityContext`가 비어 있을 수 있는 구조였습니다.
-- **원인**: HTTP 인증(`JwtAuthenticationFilter`)과 WebSocket 인증(`StompAuthChannelInterceptor`)이 서로 다른
-  시점/스레드에서 동작하는데, 후자가 전자의 부산물에 암묵적으로 의존하고 있었습니다.
-- **해결**: STOMP `CONNECT` 프레임의 `Authorization` 헤더에서 JWT를 직접 꺼내 검증하고, `StompPrincipal(memberId)`을
-  직접 만들어 세션에 설정하도록 변경해 `SecurityContext` 의존을 제거했습니다.
-- **배운 점**: HTTP와 WebSocket은 별개의 인증 파이프라인으로 다뤄야 합니다. 한 프로토콜의 인증 결과를 다른
-  프로토콜 컨텍스트에서 그대로 재사용하려는 시도는 프레임워크의 스레드/컨텍스트 경계를 넘는 순간 깨지기 쉽습니다.
-
-### 인증 실패 응답이 REST API 클라이언트에 맞지 않던 문제
-- **문제**: `Authorization` 헤더 없이 보호된 `/api/**`를 호출하면 401이 아니라 302(카카오 로그인 페이지 리다이렉트)가
-  응답되고 있었습니다.
-- **원인**: `oauth2Login()`이 등록하는 기본 `AuthenticationEntryPoint`가 "브라우저의 로그인 흐름"을 전제로 설계되어,
-  인증되지 않은 모든 요청을 로그인 페이지로 리다이렉트시켰습니다.
-- **해결**: `/api/**` 전용 `RestAuthenticationEntryPoint`를 추가해 이 프로젝트의 `ErrorException`/`ErrorCode`
-  컨벤션에 맞춘 401 JSON을 응답하게 하고, `exceptionHandling().defaultAuthenticationEntryPointFor(entryPoint, matcher)`로
-  경로 기반 분기를 적용했습니다. 실제 브라우저의 카카오 로그인 흐름(Accept: text/html)은 기존 리다이렉트를 그대로 유지합니다.
-- **배운 점**: 여러 인증 메커니즘(OAuth2 로그인 / JWT API)이 한 서버에 공존할 때는 "인증 실패 시 무엇을 응답할지"를
-  요청 종류에 따라 명확히 분리해서 설정해야 합니다.
-
-### 예외 처리 컨벤션 불일치로 인한 잘못된 상태 코드 (500 vs 400)
-- **문제**: 이미 사용됐거나 무효화된 refresh token으로 재발급을 시도하면 400이 아니라 500(Internal Server Error)이
-  응답되고 있었습니다.
-- **원인**: 컨트롤러가 `IllegalArgumentException`을 던졌는데, 전역 예외 처리기(`ExceptionAdvice`)에는 이 예외 전용
-  핸들러가 없어 범용 `Exception` 핸들러(500)로 처리되고 있었습니다.
-- **해결**: 이 프로젝트가 이미 쓰고 있던 `ErrorException` + `ErrorCode` 컨벤션에 맞춰 `INVALID_REFRESH_TOKEN`(400)
-  코드를 추가하고, 해당 예외로 교체했습니다.
-- **배운 점**: 새 예외를 던지기 전에 전역 예외 처리기가 그 타입을 실제로 처리할 수 있는지 먼저 확인해야 하며,
-  이미 컨벤션이 있다면 새로 만들기보다 거기에 맞추는 편이 일관된 API 응답을 만듭니다.
-
-## 7. 테스트
-
-JUnit5 + Mockito + AssertJ 기반 단위 테스트와, `MockMvc` / `@SpringBootTest` 기반 통합 테스트를 함께 사용합니다.
-이번 JWT / Spring Security / WebSocket 인증 리팩토링에 대해서는 아래 시나리오를 검증하는 테스트를 추가했습니다.
-
-- `JwtAuthenticationFilterTest`: 유효한 JWT의 `MemberDetails` principal 검증, 만료/서명불일치 JWT의 인증 거부
-- `RefreshTokenStoreTest`: 블랙리스트 등록 전/후 동작 검증
-- `TokenControllerIntegrationTest`, `AuthControllerIntegrationTest`: 토큰 재발급/로그아웃 API의 실제 응답(상태 코드, 쿠키, 에러 코드) 검증
-- `SecurityConfigIntegrationTest`: `/api/**` 401 JSON 응답, 카카오 로그인 리다이렉트 유지, permitAll 경로 검증
-- `StompAuthChannelInterceptorTest`, `StompErrorHandlerTest`: WebSocket CONNECT 인증 성공/실패, 예외의 cause 체인 처리 검증
-
-```bash
-./gradlew test                 # 테스트 실행
-./gradlew test jacocoTestReport  # 테스트 + 커버리지 리포트 생성
-```
-
-커버리지 리포트(HTML)는 `build/reports/jacoco/test/html/index.html`에 생성됩니다.
-이번 리팩토링 대상 파일들의 라인 커버리지는 다음과 같습니다.
-
-| 파일 | 라인 커버리지 |
-|---|---|
-| `RestAuthenticationEntryPoint` | 100% |
+| 파일 | 커버리지 |
+|---|---:|
 | `SecurityConfig` | 100% |
 | `JwtAuthenticationFilter` | 100% |
 | `StompAuthChannelInterceptor` | 100% |
 | `RefreshTokenStore` | 100% |
+| `RestAuthenticationEntryPoint` | 100% |
 | `TokenController` | 93.3% |
 | `StompErrorHandler` | 84.0% |
 | `AuthController` | 60.0% |
 
-`SecurityConfig`, `RefreshTokenStore`, `RestAuthenticationEntryPoint`, `JwtAuthenticationFilter`,
-`StompAuthChannelInterceptor` 등 이번에 새로 만들거나 로직을 교체한 핵심 인증 컴포넌트는 90~100%
-라인 커버리지를 달성했습니다.
+`AuthController`는 리팩토링 범위 밖인 카카오 · 게스트 로그인 로직이 같은 클래스에 있어 낮게 나온다.
 
-`AuthController`가 60%로 상대적으로 낮은 이유는, 테스트로 검증한 로그아웃 로직 외에 이번
-리팩토링 범위 밖인 `kakaoLogin`/`guestLogin`(카카오 OAuth2 연동, 실제 회원 가입 로직)이 같은
-클래스에 포함되어 있기 때문입니다. `StompErrorHandler`의 미완주 라인은 `ErrorException`이 아닌
-예외를 `super.handleClientMessageProcessingError()`로 위임하는 fallback 경로의 세부 분기입니다.
+</details>
 
-## 8. 실행 방법
+```bash
+./gradlew test                    # flaky 태그 제외 전체 테스트 + JaCoCo 리포트
+./gradlew testFlaky               # 동시성 테스트만 따로
+```
 
-### 요구 사항
-- JDK 21
+<br>
 
-### 설정 파일
-이 저장소에는 `application.yml`이 포함되어 있지 않습니다(CI/CD에서 GitHub Secrets로 주입되는 구조).
-로컬에서 실행하려면 `src/main/resources/application.yml`을 직접 작성하고, 아래 값을 채워야 합니다.
+## 🔭 남은 과제
 
-- `spring.datasource.*` (MySQL 접속 정보)
-- `spring.security.oauth2.client.registration.kakao.{client-id,client-secret,redirect-uri}` (카카오 OAuth2)
-- `jwt.{secret,access-token-expiration,refresh-token-expiration}` (JWT 서명 키 및 만료 시간)
-- `cloud.aws.credentials.{access-key,secret-key}`, `cloud.aws.region.static`, `cloud.aws.s3.bucket` (S3 Presigned URL)
+- **공감 수 처리 방식** — 공감 VU가 50명을 넘으면 리팩토링 전후 모두 공감 반영률이 97% → 83% → 63%로 떨어진다. 한 행에 쓰기가 몰리는 곳에 낙관적 락 + 재시도를 쓰고 있기 때문이다. 공감 수를 **원자적 조건부 UPDATE**로 바꾸거나 별도 테이블로 분리하는 것이 다음 대상이다.
+- **답변 수정 재시도 제거** — 위 작업으로 공감 수가 답변 버전에서 분리되면 `AnswerFacade`의 재시도도 필요 없어진다.
+- **배포 흐름 재검증** — 현재 EC2는 내려가 있다. 프리티어 인스턴스로 release → 배포 전 과정을 다시 확인할 예정이다.
 
-### 로컬 실행
+<br>
+
+## ⚙️ 실행 방법
+
+<details>
+<summary><b>로컬 실행</b></summary>
+
+<br>
+
+**요구 사항**: JDK 21, MySQL
+
+`application.yml`은 저장소에 없다(CI/CD에서 GitHub Secrets로 주입). 로컬에서는 `src/main/resources/application.yml`에 아래 값을 채운다.
+
+- `spring.datasource.*` — MySQL 접속 정보
+- `spring.security.oauth2.client.registration.kakao.*` — 카카오 OAuth2
+- `jwt.secret`, `jwt.access-token-expiration`, `jwt.refresh-token-expiration`
+- `cloud.aws.*` — S3 Presigned URL
+
 ```bash
 ./gradlew bootRun
 ```
 
-### 테스트
-```bash
-./gradlew test
-```
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- Docker 빌드: `docker build --build-arg SPRING_PROFILES_ACTIVE=dev -t joinin-be .`
+- k6 부하 테스트 실행 방법: [load-test/README.md](load-test/README.md)
 
-### Docker
-```bash
-docker build --build-arg SPRING_PROFILES_ACTIVE=dev -t oronaminc-be .
-```
-
-### API 문서
-애플리케이션 실행 후 `http://localhost:8080/swagger-ui/index.html`에서 Swagger UI로 API 명세를 확인할 수 있습니다.
+</details>
